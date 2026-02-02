@@ -30,9 +30,12 @@ class CardioDataViewModel(
 
     // Settings state
     val showSettings: MutableState<Boolean> = mutableStateOf(false)
+    val showPatternSelection: MutableState<Boolean> = mutableStateOf(false)
     val minHeartRate: MutableState<Int> = mutableStateOf(UserPreferences.DEFAULT_MIN_HR)
     val maxHeartRate: MutableState<Int> = mutableStateOf(UserPreferences.DEFAULT_MAX_HR)
     val alertsEnabled: MutableState<Boolean> = mutableStateOf(true)
+    val hapticPattern: MutableState<String> = mutableStateOf(UserPreferences.DEFAULT_HAPTIC_PATTERN)
+    val alertCooldown: MutableState<Int> = mutableStateOf(UserPreferences.DEFAULT_ALERT_COOLDOWN)
 
     init {
         viewModelScope.launch {
@@ -72,6 +75,24 @@ class CardioDataViewModel(
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error loading alerts enabled", e)
+                }
+            }
+            viewModelScope.launch {
+                try {
+                    it.hapticPatternFlow.collectLatest { value ->
+                        hapticPattern.value = value
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error loading haptic pattern", e)
+                }
+            }
+            viewModelScope.launch {
+                try {
+                    it.alertCooldownFlow.collectLatest { value ->
+                        alertCooldown.value = value
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error loading alert cooldown", e)
                 }
             }
         }
@@ -115,6 +136,24 @@ class CardioDataViewModel(
 
     fun toggleShowSettings() {
         showSettings.value = !showSettings.value
+    }
+
+    fun toggleShowPatternSelection() {
+        showPatternSelection.value = !showPatternSelection.value
+    }
+
+    fun selectHapticPattern(patternName: String) {
+        hapticPattern.value = patternName
+        userPreferences?.let {
+            viewModelScope.launch {
+                try {
+                    it.setHapticPattern(patternName)
+                    Log.d(TAG, "Haptic pattern saved: $patternName")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error saving haptic pattern", e)
+                }
+            }
+        }
     }
 
     fun saveSettings(minHr: Int, maxHr: Int, alertsEnabledValue: Boolean) {

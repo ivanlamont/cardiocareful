@@ -24,4 +24,9 @@
     <string name="max_hr_range_error">Max HR must be 20-220</string>
     <string name="min_max_error">Min must be ≤ Max</string>
     <string name="settings_error">Error saving settings</string>
+
+    <!-- Haptic Pattern Screen -->
+    <string name="haptic_patterns">Haptic Patterns</string>
+    <string name="preview">Preview</string>
+    <string name="done">Done</string>
 </resources>
