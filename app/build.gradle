@@ -77,6 +77,9 @@ dependencies {
     // DataStore for preferences
     implementation libs.androidx.datastore.preferences
 
+    // WorkManager for background tasks
+    implementation libs.androidx.work.runtime
+
     // Testing
     testImplementation libs.junit
     testImplementation libs.mockito.core

@@ -19,6 +19,7 @@ junit = "4.13.2"
 mockito = "5.3.1"
 mockito-kotlin = "5.1.0"
 turbine = "0.12.1"
+androidx-work = "2.8.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
@@ -42,6 +43,7 @@ junit = { module = "junit:junit", version.ref = "junit" }
 mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
 mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
