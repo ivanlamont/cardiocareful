@@ -34,4 +34,14 @@
     <string name="notifications_enabled">Notifications On</string>
     <string name="notifications_disabled">Notifications Off</string>
     <string name="show_status_notifications">Show Status</string>
+
+    <!-- Profiles -->
+    <string name="alert_profiles">Alert Profiles</string>
+    <string name="select_profile">Select Profile</string>
+    <string name="create_profile">Create Profile</string>
+    <string name="profile_name">Profile Name</string>
+    <string name="default">Default</string>
+    <string name="cardio_workout">Cardio Workout</string>
+    <string name="recovery">Recovery</string>
+    <string name="warm_up">Warm-up</string>
 </resources>

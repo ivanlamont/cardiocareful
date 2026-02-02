@@ -10,7 +10,7 @@ import androidx.room.TypeConverters
  * Room database for Cardio Careful application.
  */
 @Database(
-    entities = [HeartRateReading::class],
+    entities = [HeartRateReading::class, AlertProfile::class],
     version = 1,
     exportSchema = false
 )
@@ -18,6 +18,7 @@ import androidx.room.TypeConverters
 abstract class CardioDatabase : RoomDatabase() {
 
     abstract fun heartRateReadingDao(): HeartRateReadingDao
+    abstract fun alertProfileDao(): AlertProfileDao
 
     companion object {
         @Volatile
