@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.explorova.cardiocareful.TAG
 import com.explorova.cardiocareful.data.CardioMessage
 import com.explorova.cardiocareful.data.HealthServicesRepository
+import com.explorova.cardiocareful.data.HeartRateRepository
 import com.explorova.cardiocareful.data.UserPreferences
 import com.explorova.cardiocareful.presentation.Haptics
 import com.explorova.cardiocareful.presentation.NotificationManager
@@ -18,6 +19,7 @@ class MonitorData(
     healthServicesRepository: HealthServicesRepository,
     context: android.content.Context,
     private val userPreferences: UserPreferences? = null,
+    private val heartRateRepository: HeartRateRepository? = null,
 ) {
     private var notifications: MutableList<Notification> = loadNotifications()
     private val heartrateBpm: MutableState<Double> = mutableStateOf(0.0)
@@ -111,22 +113,38 @@ class MonitorData(
         currentHeartRate: Double,
     ) {
         Log.d(TAG, "heart rate $currentHeartRate")
+        var alertTriggered = false
+        var alertType: String? = null
+
         for (item in notifications) {
             Log.d(TAG, "checking condition $item")
             if (item.checkConditions(currentHeartRate)) {
+                alertTriggered = true
+                alertType = when {
+                    item.pattern.amplitudes.maxOrNull() ?: 0 > 200 -> "High Alert"
+                    item.pattern.amplitudes.maxOrNull() ?: 0 > 100 -> "Medium Alert"
+                    else -> "Alert"
+                }
+
                 haptics.sendVibration(item.pattern)
 
                 // Send notification if enabled
                 if (notificationsEnabled) {
-                    val alertType = when {
-                        item.pattern.amplitudes.maxOrNull() ?: 0 > 200 -> "High Alert"
-                        item.pattern.amplitudes.maxOrNull() ?: 0 > 100 -> "Medium Alert"
-                        else -> "Alert"
-                    }
                     notificationManager.showHeartRateAlert(currentHeartRate, alertType)
                 }
             } else {
                 Log.d(TAG, "condition not fired")
+            }
+        }
+
+        // Log the reading to the database
+        heartRateRepository?.let {
+            scope.launch {
+                try {
+                    it.logReading(currentHeartRate, alertTriggered, alertType)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error logging heart rate reading", e)
+                }
             }
         }
 
