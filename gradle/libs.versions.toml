@@ -15,6 +15,10 @@ ktlint = "1.2.1"
 org-jetbrains-kotlin = "1.9.22"
 org-jetbrains-kotlinx = "1.6.0"
 kotlinx = "1.1.0"
+junit = "4.13.2"
+mockito = "5.3.1"
+mockito-kotlin = "5.1.0"
+turbine = "0.12.1"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanist-permissions" }
@@ -34,6 +38,10 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 wear-compose-foundation = { module = "androidx.wear.compose:compose-foundation", version.ref = "androidx-wear-compose" }
 wear-compose-material = { module = "androidx.wear.compose:compose-material", version.ref = "androidx-wear-compose" }
 kotlinx = { group = "com.kotlinx", name = "kotlinx", version.ref = "kotlinx" }
+junit = { module = "junit:junit", version.ref = "junit" }
+mockito-core = { module = "org.mockito:mockito-core", version.ref = "mockito" }
+mockito-kotlin = { module = "org.mockito.kotlin:mockito-kotlin", version.ref = "mockito-kotlin" }
+turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 
 [plugins]
 com-android-application = { id = "com.android.application", version.ref = "android-gradle-plugin" }
