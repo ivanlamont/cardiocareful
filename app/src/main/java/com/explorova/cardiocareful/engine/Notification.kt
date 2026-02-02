@@ -61,6 +61,23 @@ class Notification(
         return true
     }
 
+    /**
+     * Get the remaining cooldown time in seconds, or 0 if not in cooldown
+     */
+    fun getRemainingCooldown(): Int {
+        if (repeatIntervalSecs == null || becameHot == null) {
+            return 0
+        }
+
+        val now = LocalDateTime.now()
+        val whenItsOK = becameHot!!.plusSeconds(repeatIntervalSecs.toLong())
+        return if (now.isBefore(whenItsOK)) {
+            java.time.temporal.ChronoUnit.SECONDS.between(now, whenItsOK).toInt()
+        } else {
+            0
+        }
+    }
+
     override fun toString(): String {
         return "Notification(Name='$name', MinRate=$minRate, MaxRate=$maxRate, MinDuration=$repeatIntervalSecs, becameHot=$becameHot)"
     }
@@ -89,7 +106,7 @@ class Notification(
         /**
          * Create a notification from user-configured thresholds
          */
-        fun createFromUserPreferences(minHr: Int?, maxHr: Int?): Notification {
+        fun createFromUserPreferences(minHr: Int?, maxHr: Int?, cooldownSeconds: Int = 30): Notification {
             val timings: LongArray = longArrayOf(50, 50, 100, 50, 50)
             val amplitudes: IntArray = intArrayOf(64, 128, 255, 128, 64)
             val pattern = AlertPattern(timings, amplitudes, repeatIndex = 1)
@@ -98,7 +115,7 @@ class Notification(
                 pattern,
                 minRate = minHr,
                 maxRate = maxHr,
-                repeatIntervalSeconds = 30
+                repeatIntervalSeconds = cooldownSeconds
             )
         }
     }

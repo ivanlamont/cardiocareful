@@ -9,6 +9,7 @@ import com.explorova.cardiocareful.data.HealthServicesRepository
 import com.explorova.cardiocareful.data.UserPreferences
 import com.explorova.cardiocareful.presentation.Haptics
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.takeWhile
 import kotlinx.coroutines.launch
 
@@ -17,13 +18,36 @@ class MonitorData(
     context: android.content.Context,
     private val userPreferences: UserPreferences? = null,
 ) {
-    private val notifications: MutableList<Notification> = loadNotifications()
+    private var notifications: MutableList<Notification> = loadNotifications()
     private val heartrateBpm: MutableState<Double> = mutableStateOf(0.0)
     private val haptics: Haptics = Haptics(context)
+    private val scope = kotlinx.coroutines.MainScope()
 
     init {
         val enabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
-        val scope = kotlinx.coroutines.MainScope()
+
+        // Watch for user preference changes and update notifications
+        userPreferences?.let {
+            scope.launch {
+                try {
+                    combine(
+                        it.minHeartRateFlow,
+                        it.maxHeartRateFlow,
+                        it.alertCooldownFlow
+                    ) { minHr, maxHr, cooldown ->
+                        Triple(minHr, maxHr, cooldown)
+                    }.collect { (minHr, maxHr, cooldown) ->
+                        Log.d(TAG, "Preferences changed: minHr=$minHr, maxHr=$maxHr, cooldown=$cooldown")
+                        // Update notifications with new preferences
+                        notifications = mutableListOf(
+                            Notification.createFromUserPreferences(minHr, maxHr, cooldown)
+                        )
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error watching preferences", e)
+                }
+            }
+        }
 
         scope.launch {
             try {
