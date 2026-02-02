@@ -25,14 +25,29 @@ class Haptics {
     }
 
     fun startVibration(timings: LongArray, amplitudes: IntArray, repeat: Int = 0) {
-        if (vibrationAvailable()) {
+        if (!vibrationAvailable()) {
+            Log.d(TAG, "Prior vibration command is (probably) still running")
+            return
+        }
+
+        try {
+            require(timings.isNotEmpty() && amplitudes.isNotEmpty()) {
+                "Timings and amplitudes must not be empty"
+            }
+            require(timings.size == amplitudes.size) {
+                "Timings and amplitudes must have the same size"
+            }
+
             val singleLength = timings.sum()
             Log.d(TAG, "Beginning vibration command expecting to take $singleLength ms")
-            val copies : Int = if (repeat > 0) repeat else 1
+            val copies = if (repeat > 0) repeat else 1
             noteVibrationEndTime(singleLength * copies)
-            vibes.vibrate(VibrationEffect.createWaveform(timings, amplitudes, repeat))
-        } else
-            Log.d(TAG, "Prior vibration command is (probably) still running")
+
+            val effect = VibrationEffect.createWaveform(timings, amplitudes, repeat)
+            vibes.vibrate(effect)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during vibration", e)
+        }
     }
 
     fun noteVibrationEndTime(duration_ms: Long) {

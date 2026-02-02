@@ -21,28 +21,36 @@ class MonitorData(
     private val haptics: Haptics = Haptics(context)
 
     init {
-
         val enabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
-
         val scope = kotlinx.coroutines.MainScope()
 
         scope.launch {
-            enabled.collect {
-                if (it) {
-                    healthServicesRepository.heartRateMeasureFlow()
-                        .takeWhile { enabled.value }
-                        .collect { cardioDataMessage ->
-                            when (cardioDataMessage) {
-                                is CardioMessage.CardioData -> {
-                                    heartrate_bpm.value = cardioDataMessage.data.last().value
-                                    checkData(notifications, heartrate_bpm.value)
+            try {
+                enabled.collect {
+                    if (it) {
+                        try {
+                            healthServicesRepository.heartRateMeasureFlow()
+                                .takeWhile { enabled.value }
+                                .collect { cardioDataMessage ->
+                                    when (cardioDataMessage) {
+                                        is CardioMessage.CardioData -> {
+                                            if (cardioDataMessage.data.isNotEmpty()) {
+                                                heartrate_bpm.value = cardioDataMessage.data.last().value
+                                                checkData(notifications, heartrate_bpm.value)
+                                            }
+                                        }
+                                        is CardioMessage.CardioAvailability -> {
+                                            Log.d(TAG, "Heart rate availability: ${cardioDataMessage.availability.availability}")
+                                        }
+                                    }
                                 }
-                                else -> {
-
-                                }
-                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error in heart rate measurement flow", e)
                         }
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error in monitoring initialization", e)
             }
         }
     }

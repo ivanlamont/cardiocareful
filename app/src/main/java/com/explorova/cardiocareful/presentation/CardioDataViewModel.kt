@@ -1,11 +1,13 @@
 package com.explorova.cardiocareful.presentation
 
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.health.services.client.data.DataTypeAvailability
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.explorova.cardiocareful.TAG
 import com.explorova.cardiocareful.data.HealthServicesRepository
 import com.explorova.cardiocareful.data.CardioMessage
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,18 +38,28 @@ class CardioDataViewModel(
         viewModelScope.launch {
             enabled.collect {
                 if (it) {
-                    healthServicesRepository.heartRateMeasureFlow()
-                        .takeWhile { enabled.value }
-                        .collect { cardioDataMessage ->
-                            when (cardioDataMessage) {
-                                is CardioMessage.CardioData -> {
-                                    hr.value = cardioDataMessage.data.last().value
-                                }
-                                is CardioMessage.CardioAvailability -> {
-                                    availability.value = cardioDataMessage.availability
+                    try {
+                        healthServicesRepository.heartRateMeasureFlow()
+                            .takeWhile { enabled.value }
+                            .collect { cardioDataMessage ->
+                                when (cardioDataMessage) {
+                                    is CardioMessage.CardioData -> {
+                                        if (cardioDataMessage.data.isNotEmpty()) {
+                                            hr.value = cardioDataMessage.data.last().value
+                                        } else {
+                                            Log.w(TAG, "Received empty heart rate data")
+                                        }
+                                    }
+                                    is CardioMessage.CardioAvailability -> {
+                                        availability.value = cardioDataMessage.availability
+                                        Log.d(TAG, "Availability updated: ${cardioDataMessage.availability.availability}")
+                                    }
                                 }
                             }
-                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error collecting heart rate data", e)
+                        enabled.value = false
+                    }
                 }
             }
         }

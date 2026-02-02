@@ -48,7 +48,9 @@ class Notification(name: String, alertPattern: AlertPattern, minRate: Int? = nul
     }
 
     private fun hot() : Boolean {
-        becameHot?: let { becameHot = LocalDateTime.now() }
+        if (becameHot == null) {
+            becameHot = LocalDateTime.now()
+        }
         return true
     }
 

@@ -27,8 +27,15 @@ class HealthServicesRepository(context: Context) {
     private val measureClient = healthServicesClient.measureClient
 
     suspend fun hasHeartRateCapability(): Boolean {
-        val capabilities = measureClient.getCapabilitiesAsync().await()
-        return (DataType.HEART_RATE_BPM in capabilities.supportedDataTypesMeasure)
+        return try {
+            val capabilities = measureClient.getCapabilitiesAsync().await()
+            val hasCapability = DataType.HEART_RATE_BPM in capabilities.supportedDataTypesMeasure
+            Log.d(TAG, "Heart rate capability check: $hasCapability")
+            hasCapability
+        } catch (e: Exception) {
+            Log.e(TAG, "Error checking heart rate capability", e)
+            false
+        }
     }
 
     /**
@@ -46,24 +53,42 @@ class HealthServicesRepository(context: Context) {
             ) {
                 // Only send back DataTypeAvailability (not LocationAvailability)
                 if (availability is DataTypeAvailability) {
+                    Log.d(TAG, "Heart rate availability changed: ${availability.availability}")
                     trySendBlocking(CardioMessage.CardioAvailability(availability))
                 }
             }
 
             override fun onDataReceived(data: DataPointContainer) {
-                val heartRateBpm = data.getData(DataType.HEART_RATE_BPM)
-                trySendBlocking(CardioMessage.CardioData(heartRateBpm))
+                try {
+                    val heartRateBpm = data.getData(DataType.HEART_RATE_BPM)
+                    if (heartRateBpm.isNotEmpty()) {
+                        trySendBlocking(CardioMessage.CardioData(heartRateBpm))
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error processing heart rate data", e)
+                }
             }
         }
 
-        Log.d(TAG, "Registering for data")
-        measureClient.registerMeasureCallback(DataType.HEART_RATE_BPM, callback)
+        try {
+            Log.d(TAG, "Registering for heart rate data")
+            measureClient.registerMeasureCallback(DataType.HEART_RATE_BPM, callback)
+            Log.d(TAG, "Successfully registered for heart rate data")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error registering measure callback", e)
+            close(e)
+        }
 
         awaitClose {
-            Log.d(TAG, "Unregistering for data")
-            runBlocking {
-                measureClient.unregisterMeasureCallbackAsync(DataType.HEART_RATE_BPM, callback)
-                    .await()
+            try {
+                Log.d(TAG, "Unregistering for heart rate data")
+                runBlocking {
+                    measureClient.unregisterMeasureCallbackAsync(DataType.HEART_RATE_BPM, callback)
+                        .await()
+                }
+                Log.d(TAG, "Successfully unregistered for heart rate data")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error unregistering measure callback", e)
             }
         }
     }
