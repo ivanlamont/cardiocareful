@@ -24,12 +24,16 @@ class UserPreferences(private val context: Context) {
         private val ALERTS_ENABLED_KEY = intPreferencesKey("alerts_enabled") // 0 = false, 1 = true
         private val HAPTIC_PATTERN_KEY = stringPreferencesKey("haptic_pattern")
         private val ALERT_COOLDOWN_KEY = intPreferencesKey("alert_cooldown_seconds")
+        private val NOTIFICATIONS_ENABLED_KEY = intPreferencesKey("notifications_enabled") // 0 = false, 1 = true
+        private val SHOW_STATUS_NOTIFICATIONS_KEY = intPreferencesKey("show_status_notifications") // 0 = false, 1 = true
 
         const val DEFAULT_MIN_HR = 60
         const val DEFAULT_MAX_HR = 100
         const val DEFAULT_ALERTS_ENABLED = 1
         const val DEFAULT_HAPTIC_PATTERN = "SHORT"
         const val DEFAULT_ALERT_COOLDOWN = 30
+        const val DEFAULT_NOTIFICATIONS_ENABLED = 1
+        const val DEFAULT_SHOW_STATUS_NOTIFICATIONS = 0
     }
 
     /**
@@ -53,6 +57,14 @@ class UserPreferences(private val context: Context) {
 
     val alertCooldownFlow: Flow<Int> = context.dataStore.data.map { prefs ->
         prefs[ALERT_COOLDOWN_KEY] ?: DEFAULT_ALERT_COOLDOWN
+    }
+
+    val notificationsEnabledFlow: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        (prefs[NOTIFICATIONS_ENABLED_KEY] ?: DEFAULT_NOTIFICATIONS_ENABLED) == 1
+    }
+
+    val showStatusNotificationsFlow: Flow<Boolean> = context.dataStore.data.map { prefs ->
+        (prefs[SHOW_STATUS_NOTIFICATIONS_KEY] ?: DEFAULT_SHOW_STATUS_NOTIFICATIONS) == 1
     }
 
     /**
@@ -114,6 +126,24 @@ class UserPreferences(private val context: Context) {
         require(seconds in 5..300) { "Alert cooldown must be between 5 and 300 seconds" }
         context.dataStore.edit { prefs ->
             prefs[ALERT_COOLDOWN_KEY] = seconds
+        }
+    }
+
+    /**
+     * Enable or disable system notifications
+     */
+    suspend fun setNotificationsEnabled(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[NOTIFICATIONS_ENABLED_KEY] = if (enabled) 1 else 0
+        }
+    }
+
+    /**
+     * Enable or disable status notifications
+     */
+    suspend fun setShowStatusNotifications(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[SHOW_STATUS_NOTIFICATIONS_KEY] = if (enabled) 1 else 0
         }
     }
 }

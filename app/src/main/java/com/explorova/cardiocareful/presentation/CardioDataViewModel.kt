@@ -36,6 +36,8 @@ class CardioDataViewModel(
     val alertsEnabled: MutableState<Boolean> = mutableStateOf(true)
     val hapticPattern: MutableState<String> = mutableStateOf(UserPreferences.DEFAULT_HAPTIC_PATTERN)
     val alertCooldown: MutableState<Int> = mutableStateOf(UserPreferences.DEFAULT_ALERT_COOLDOWN)
+    val notificationsEnabled: MutableState<Boolean> = mutableStateOf(true)
+    val showStatusNotifications: MutableState<Boolean> = mutableStateOf(false)
 
     init {
         viewModelScope.launch {
@@ -93,6 +95,24 @@ class CardioDataViewModel(
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error loading alert cooldown", e)
+                }
+            }
+            viewModelScope.launch {
+                try {
+                    it.notificationsEnabledFlow.collectLatest { value ->
+                        notificationsEnabled.value = value
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error loading notifications enabled", e)
+                }
+            }
+            viewModelScope.launch {
+                try {
+                    it.showStatusNotificationsFlow.collectLatest { value ->
+                        showStatusNotifications.value = value
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error loading show status notifications", e)
                 }
             }
         }

@@ -8,6 +8,7 @@ import com.explorova.cardiocareful.data.CardioMessage
 import com.explorova.cardiocareful.data.HealthServicesRepository
 import com.explorova.cardiocareful.data.UserPreferences
 import com.explorova.cardiocareful.presentation.Haptics
+import com.explorova.cardiocareful.presentation.NotificationManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.takeWhile
@@ -21,7 +22,10 @@ class MonitorData(
     private var notifications: MutableList<Notification> = loadNotifications()
     private val heartrateBpm: MutableState<Double> = mutableStateOf(0.0)
     private val haptics: Haptics = Haptics(context)
+    private val notificationManager: NotificationManager = NotificationManager(context)
     private val scope = kotlinx.coroutines.MainScope()
+    private var notificationsEnabled = true
+    private var showStatusNotifications = false
 
     init {
         val enabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
@@ -45,6 +49,22 @@ class MonitorData(
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error watching preferences", e)
+                }
+            }
+            scope.launch {
+                try {
+                    combine(
+                        it.notificationsEnabledFlow,
+                        it.showStatusNotificationsFlow
+                    ) { notifEnabled, statusNotif ->
+                        Pair(notifEnabled, statusNotif)
+                    }.collect { (notifEnabled, statusNotif) ->
+                        notificationsEnabled = notifEnabled
+                        showStatusNotifications = statusNotif
+                        Log.d(TAG, "Notification prefs changed: enabled=$notifEnabled, status=$statusNotif")
+                    }
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error watching notification preferences", e)
                 }
             }
         }
@@ -95,9 +115,30 @@ class MonitorData(
             Log.d(TAG, "checking condition $item")
             if (item.checkConditions(currentHeartRate)) {
                 haptics.sendVibration(item.pattern)
+
+                // Send notification if enabled
+                if (notificationsEnabled) {
+                    val alertType = when {
+                        item.pattern.amplitudes.maxOrNull() ?: 0 > 200 -> "High Alert"
+                        item.pattern.amplitudes.maxOrNull() ?: 0 > 100 -> "Medium Alert"
+                        else -> "Alert"
+                    }
+                    notificationManager.showHeartRateAlert(currentHeartRate, alertType)
+                }
             } else {
                 Log.d(TAG, "condition not fired")
             }
+        }
+
+        // Show status notification if enabled
+        if (showStatusNotifications) {
+            val status = when {
+                currentHeartRate < 60 -> "Low"
+                currentHeartRate < 100 -> "Normal"
+                currentHeartRate < 140 -> "Elevated"
+                else -> "High"
+            }
+            notificationManager.showStatusNotification(currentHeartRate, status)
         }
     }
 }
