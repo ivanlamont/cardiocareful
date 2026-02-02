@@ -44,4 +44,13 @@
     <string name="cardio_workout">Cardio Workout</string>
     <string name="recovery">Recovery</string>
     <string name="warm_up">Warm-up</string>
+
+    <!-- Accessibility -->
+    <string name="heart_rate_display">Heart rate display showing %1$d beats per minute</string>
+    <string name="start_monitoring_button">Start monitoring button</string>
+    <string name="stop_monitoring_button">Stop monitoring button</string>
+    <string name="alert_indicator">Alert indicator - Active when alert condition is triggered</string>
+    <string name="monitoring_status_label">Monitoring status</string>
+    <string name="heart_rate_value">%1$d beats per minute</string>
+    <string name="cooldown_status">Alert cooling down for %1$d seconds</string>
 </resources>
