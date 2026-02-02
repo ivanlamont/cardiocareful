@@ -14,7 +14,7 @@ import androidx.health.services.client.data.DataTypeAvailability
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Text
 import com.explorova.cardiocareful.R
-import com.explorova.cardiocareful.theme.CardioCarefulTheme
+import com.explorova.cardiocareful.theme.cardioCarefulTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.PermissionStatus
@@ -22,21 +22,21 @@ import com.google.accompanist.permissions.isGranted
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun MainScreen(
+fun mainScreen(
     hr: Double,
     availability: DataTypeAvailability,
     enabled: Boolean,
     onButtonClick: () -> Unit,
-    permissionState: PermissionState
+    permissionState: PermissionState,
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
-        HrLabel(
+        hrLabel(
             hr = hr,
-            availability = availability
+            availability = availability,
         )
         Button(
             modifier = Modifier.fillMaxWidth(0.5f),
@@ -46,13 +46,14 @@ fun MainScreen(
                 } else {
                     permissionState.launchPermissionRequest()
                 }
-            }
+            },
         ) {
-            val buttonTextId = if (enabled) {
-                R.string.stop
-            } else {
-                R.string.start
-            }
+            val buttonTextId =
+                if (enabled) {
+                    R.string.stop
+                } else {
+                    R.string.start
+                }
             Text(stringResource(buttonTextId))
         }
     }
@@ -62,22 +63,24 @@ fun MainScreen(
 @Preview(
     device = Devices.WEAR_OS_SMALL_ROUND,
     showBackground = false,
-    showSystemUi = true
+    showSystemUi = true,
 )
 @Composable
-fun MainScreenPreview() {
-    val permissionState = object : PermissionState {
-        override val permission = "android.permission.ACTIVITY_RECOGNITION"
-        override val status: PermissionStatus = PermissionStatus.Granted
-        override fun launchPermissionRequest() {}
-    }
-    CardioCarefulTheme {
-        MainScreen(
+fun mainScreenPreview() {
+    val permissionState =
+        object : PermissionState {
+            override val permission = "android.permission.ACTIVITY_RECOGNITION"
+            override val status: PermissionStatus = PermissionStatus.Granted
+
+            override fun launchPermissionRequest() {}
+        }
+    cardioCarefulTheme {
+        mainScreen(
             hr = 68.0,
             availability = DataTypeAvailability.AVAILABLE,
             enabled = false,
             onButtonClick = {},
-            permissionState = permissionState
+            permissionState = permissionState,
         )
     }
 }

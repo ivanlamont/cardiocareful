@@ -73,4 +73,7 @@ dependencies {
     // Used for permissions
     implementation libs.accompanist.permissions
     implementation libs.annotations
+
+    // DataStore for preferences
+    implementation libs.androidx.datastore.preferences
 }

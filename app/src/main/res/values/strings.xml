@@ -8,4 +8,20 @@
     <string name="icon">Icon</string>
 
     <string name="no_hr_reading">--</string>
+
+    <!-- Settings Screen -->
+    <string name="settings">Settings</string>
+    <string name="min_heart_rate">Min HR (bpm)</string>
+    <string name="max_heart_rate">Max HR (bpm)</string>
+    <string name="alerts_enabled">Alerts On</string>
+    <string name="alerts_disabled">Alerts Off</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+
+    <!-- Error Messages -->
+    <string name="invalid_input">Invalid input</string>
+    <string name="min_hr_range_error">Min HR must be 20-220</string>
+    <string name="max_hr_range_error">Max HR must be 20-220</string>
+    <string name="min_max_error">Min must be ≤ Max</string>
+    <string name="settings_error">Error saving settings</string>
 </resources>

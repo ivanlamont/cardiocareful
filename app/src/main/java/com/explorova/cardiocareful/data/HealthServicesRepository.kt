@@ -45,56 +45,59 @@ class HealthServicesRepository(context: Context) {
      *
      * [callbackFlow] is used to bridge between a callback-based API and Kotlin flows.
      */
-    fun heartRateMeasureFlow() = callbackFlow {
-        val callback = object : MeasureCallback {
-            override fun onAvailabilityChanged(
-                dataType: DeltaDataType<*, *>,
-                availability: Availability
-            ) {
-                // Only send back DataTypeAvailability (not LocationAvailability)
-                if (availability is DataTypeAvailability) {
-                    Log.d(TAG, "Heart rate availability changed: ${availability.availability}")
-                    trySendBlocking(CardioMessage.CardioAvailability(availability))
-                }
-            }
-
-            override fun onDataReceived(data: DataPointContainer) {
-                try {
-                    val heartRateBpm = data.getData(DataType.HEART_RATE_BPM)
-                    if (heartRateBpm.isNotEmpty()) {
-                        trySendBlocking(CardioMessage.CardioData(heartRateBpm))
+    fun heartRateMeasureFlow() =
+        callbackFlow {
+            val callback =
+                object : MeasureCallback {
+                    override fun onAvailabilityChanged(
+                        dataType: DeltaDataType<*, *>,
+                        availability: Availability,
+                    ) {
+                        // Only send back DataTypeAvailability (not LocationAvailability)
+                        if (availability is DataTypeAvailability) {
+                            Log.d(TAG, "Heart rate availability changed: $availability")
+                            trySendBlocking(CardioMessage.CardioAvailability(availability))
+                        }
                     }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error processing heart rate data", e)
+
+                    override fun onDataReceived(data: DataPointContainer) {
+                        try {
+                            val heartRateBpm = data.getData(DataType.HEART_RATE_BPM)
+                            if (heartRateBpm.isNotEmpty()) {
+                                trySendBlocking(CardioMessage.CardioData(heartRateBpm))
+                            }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Error processing heart rate data", e)
+                        }
+                    }
                 }
-            }
-        }
 
-        try {
-            Log.d(TAG, "Registering for heart rate data")
-            measureClient.registerMeasureCallback(DataType.HEART_RATE_BPM, callback)
-            Log.d(TAG, "Successfully registered for heart rate data")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error registering measure callback", e)
-            close(e)
-        }
-
-        awaitClose {
             try {
-                Log.d(TAG, "Unregistering for heart rate data")
-                runBlocking {
-                    measureClient.unregisterMeasureCallbackAsync(DataType.HEART_RATE_BPM, callback)
-                        .await()
-                }
-                Log.d(TAG, "Successfully unregistered for heart rate data")
+                Log.d(TAG, "Registering for heart rate data")
+                measureClient.registerMeasureCallback(DataType.HEART_RATE_BPM, callback)
+                Log.d(TAG, "Successfully registered for heart rate data")
             } catch (e: Exception) {
-                Log.e(TAG, "Error unregistering measure callback", e)
+                Log.e(TAG, "Error registering measure callback", e)
+                close(e)
+            }
+
+            awaitClose {
+                try {
+                    Log.d(TAG, "Unregistering for heart rate data")
+                    runBlocking {
+                        measureClient.unregisterMeasureCallbackAsync(DataType.HEART_RATE_BPM, callback)
+                            .await()
+                    }
+                    Log.d(TAG, "Successfully unregistered for heart rate data")
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error unregistering measure callback", e)
+                }
             }
         }
-    }
 }
 
 sealed class CardioMessage {
     class CardioAvailability(val availability: DataTypeAvailability) : CardioMessage()
+
     class CardioData(val data: List<SampleDataPoint<Double>>) : CardioMessage()
 }

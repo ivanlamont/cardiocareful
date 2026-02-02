@@ -5,7 +5,9 @@
       "Bash(java -version:*)",
       "Bash(where:*)",
       "Bash(dir:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nPhase 1: Fix code issues and add comprehensive error handling\n\n- Fix incorrect null handling in Notification.hot\\(\\) using proper if statement\n- Add handling for CardioAvailability messages in MonitorData\n- Add validation and documentation to AlertPattern class\n- Add error handling and logging throughout:\n  - HealthServicesRepository: handle exceptions in capability checks and measure callbacks\n  - Haptics: validate pattern data before sending vibration commands\n  - CardioDataViewModel: handle empty data lists and collection errors\n  - MonitorData: wrap flows in try-catch with proper logging\n- Add Java toolchain configuration for Gradle compatibility\n- Improve logging for debugging heart rate monitoring issues\n\nAcceptance criteria:\n✓ Fixed code quality issues\n✓ Added comprehensive error handling\n✓ Meaningful error messages and logging added\n✓ No unhandled exceptions in core paths\n\nCo-Authored-By: Claude Haiku 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(findstr:*)"
     ]
   }
 }

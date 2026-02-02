@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import com.explorova.cardiocareful.TAG
 import com.explorova.cardiocareful.data.CardioMessage
 import com.explorova.cardiocareful.data.HealthServicesRepository
+import com.explorova.cardiocareful.data.UserPreferences
 import com.explorova.cardiocareful.presentation.Haptics
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.takeWhile
@@ -13,11 +14,11 @@ import kotlinx.coroutines.launch
 
 class MonitorData(
     healthServicesRepository: HealthServicesRepository,
-    context: android.content.Context
+    context: android.content.Context,
+    private val userPreferences: UserPreferences? = null,
 ) {
-
     private val notifications: MutableList<Notification> = loadNotifications()
-    private val heartrate_bpm: MutableState<Double> = mutableStateOf(0.0)
+    private val heartrateBpm: MutableState<Double> = mutableStateOf(0.0)
     private val haptics: Haptics = Haptics(context)
 
     init {
@@ -35,12 +36,12 @@ class MonitorData(
                                     when (cardioDataMessage) {
                                         is CardioMessage.CardioData -> {
                                             if (cardioDataMessage.data.isNotEmpty()) {
-                                                heartrate_bpm.value = cardioDataMessage.data.last().value
-                                                checkData(notifications, heartrate_bpm.value)
+                                                heartrateBpm.value = cardioDataMessage.data.last().value
+                                                checkData(notifications, heartrateBpm.value)
                                             }
                                         }
                                         is CardioMessage.CardioAvailability -> {
-                                            Log.d(TAG, "Heart rate availability: ${cardioDataMessage.availability.availability}")
+                                            Log.d(TAG, "Heart rate availability: ${cardioDataMessage.availability}")
                                         }
                                     }
                                 }
@@ -55,19 +56,24 @@ class MonitorData(
         }
     }
 
-    fun loadNotifications() : MutableList<Notification> {
+    fun loadNotifications(): MutableList<Notification> {
+        // If user preferences are available, they should be used with flows for real-time updates
+        // For now, return sample data as fallback
         return Notification.getSampleData()
     }
 
-    fun checkData(notifications: MutableList<Notification>, currentHeartRate: Double) {
+    fun checkData(
+        notifications: MutableList<Notification>,
+        currentHeartRate: Double,
+    ) {
         Log.d(TAG, "heart rate $currentHeartRate")
-        for(item in notifications) {
+        for (item in notifications) {
             Log.d(TAG, "checking condition $item")
-            if (item.checkConditions(currentHeartRate))
+            if (item.checkConditions(currentHeartRate)) {
                 haptics.sendVibration(item.pattern)
-            else
+            } else {
                 Log.d(TAG, "condition not fired")
+            }
         }
     }
-
 }

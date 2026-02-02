@@ -18,36 +18,37 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.explorova.cardiocareful.R
-import com.explorova.cardiocareful.theme.CardioCarefulTheme
+import com.explorova.cardiocareful.theme.cardioCarefulTheme
 
 @Composable
-fun NotSupportedScreen() {
+fun notSupportedScreen() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Center,
     ) {
         Icon(
             imageVector = Icons.Default.Warning,
             contentDescription = stringResource(id = R.string.not_available),
-            tint = Color.Red
+            tint = Color.Red,
         )
         Text(
             text = stringResource(id = R.string.not_available),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         )
     }
 }
 
 @Preview(
     device = Devices.WEAR_OS_SMALL_ROUND,
-    showSystemUi = true
+    showSystemUi = true,
 )
 @Composable
-fun NotSupportedScreenPreview() {
-    CardioCarefulTheme {
-        NotSupportedScreen()
+fun notSupportedScreenPreview() {
+    cardioCarefulTheme {
+        notSupportedScreen()
     }
 }

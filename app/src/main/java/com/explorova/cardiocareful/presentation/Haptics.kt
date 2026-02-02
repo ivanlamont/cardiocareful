@@ -8,7 +8,7 @@ import com.explorova.cardiocareful.engine.AlertPattern
 import java.time.LocalDateTime
 
 class Haptics {
-    //var endOfLastVibrate: DateTime
+    // var endOfLastVibrate: DateTime
     val vibes: Vibrator
     var endOfLastVibrationSession: LocalDateTime = LocalDateTime.now()
 
@@ -20,11 +20,15 @@ class Haptics {
         startVibration(pattern.timings, pattern.amplitudes, pattern.repeatIndex)
     }
 
-    fun vibrationAvailable() : Boolean {
+    fun vibrationAvailable(): Boolean {
         return LocalDateTime.now().isAfter(endOfLastVibrationSession)
     }
 
-    fun startVibration(timings: LongArray, amplitudes: IntArray, repeat: Int = 0) {
+    fun startVibration(
+        timings: LongArray,
+        amplitudes: IntArray,
+        repeat: Int = 0,
+    ) {
         if (!vibrationAvailable()) {
             Log.d(TAG, "Prior vibration command is (probably) still running")
             return
@@ -56,4 +60,3 @@ class Haptics {
         Log.d(TAG, "Setting vibration, now is $nowtime end time $endOfLastVibrationSession")
     }
 }
-

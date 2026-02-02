@@ -20,39 +20,42 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.explorova.cardiocareful.R
-import com.explorova.cardiocareful.theme.CardioCarefulTheme
+import com.explorova.cardiocareful.theme.cardioCarefulTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 
 @Composable
-fun HrLabel(
+fun hrLabel(
     hr: Double,
-    availability: DataTypeAvailability
+    availability: DataTypeAvailability,
 ) {
-    val icon = when (availability) {
-        DataTypeAvailability.AVAILABLE -> Icons.Default.Favorite
-        DataTypeAvailability.ACQUIRING -> Icons.Default.MonitorHeart
-        DataTypeAvailability.UNAVAILABLE,
-        DataTypeAvailability.UNAVAILABLE_DEVICE_OFF_BODY -> Icons.Default.HeartBroken
-        else -> Icons.Default.QuestionMark
-    }
-    val text = if (availability == DataTypeAvailability.AVAILABLE) {
-        hr.toInt().toString()
-    } else {
-        stringResource(id = R.string.no_hr_reading)
-    }
+    val icon =
+        when (availability) {
+            DataTypeAvailability.AVAILABLE -> Icons.Default.Favorite
+            DataTypeAvailability.ACQUIRING -> Icons.Default.MonitorHeart
+            DataTypeAvailability.UNAVAILABLE,
+            DataTypeAvailability.UNAVAILABLE_DEVICE_OFF_BODY,
+            -> Icons.Default.HeartBroken
+            else -> Icons.Default.QuestionMark
+        }
+    val text =
+        if (availability == DataTypeAvailability.AVAILABLE) {
+            hr.toInt().toString()
+        } else {
+            stringResource(id = R.string.no_hr_reading)
+        }
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = icon,
             contentDescription = stringResource(R.string.icon),
-            tint = Color.Red
+            tint = Color.Red,
         )
         Text(
             text = text,
-            style = MaterialTheme.typography.display1
+            style = MaterialTheme.typography.display1,
         )
     }
 }
@@ -61,14 +64,14 @@ fun HrLabel(
 @Preview(
     device = Devices.WEAR_OS_SMALL_ROUND,
     showBackground = false,
-    showSystemUi = true
+    showSystemUi = true,
 )
 @Composable
-fun HrLabelPreview() {
-    CardioCarefulTheme {
-        HrLabel(
+fun hrLabelPreview() {
+    cardioCarefulTheme {
+        hrLabel(
             hr = 121.2,
-            availability = DataTypeAvailability.AVAILABLE
+            availability = DataTypeAvailability.AVAILABLE,
         )
     }
 }
